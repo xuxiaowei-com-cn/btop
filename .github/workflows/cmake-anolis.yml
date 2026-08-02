@@ -53,7 +53,15 @@ jobs:
         run: |
           docker exec loong64-builder bash -c '
             set -e
-            dnf install -y git cmake gcc-toolset-14 gcc-toolset-14-gcc-c++
+            dnf install -y git cmake gcc-toolset-14 gcc-toolset-14-gcc-c++ ninja-build
+          '
+
+      - name: Configure
+        run: |
+          docker exec loong64-builder bash -c '
+            set -e
+            source /opt/rh/gcc-toolset-14/enable
+            cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
           '
 
       - name: Compile
@@ -61,5 +69,13 @@ jobs:
           docker exec loong64-builder bash -c '
             set -e
             source /opt/rh/gcc-toolset-14/enable
-            gmake
+            cmake --build build --verbose
+          '
+
+      - name: Test
+        run: |
+          docker exec loong64-builder bash -c '
+            set -e
+            source /opt/rh/gcc-toolset-14/enable
+            ctest --test-dir build
           '
