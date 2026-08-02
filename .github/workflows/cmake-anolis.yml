@@ -1,0 +1,49 @@
+name: Anolis CMake
+
+permissions: { }
+
+on:
+  workflow_dispatch:
+  push:
+    branches: main
+    tags-ignore: '*.*'
+    paths:
+      - '.github/workflows/cmake-anolis.yml'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'include/**'
+      - 'src/*pp'
+      - 'src/linux/*pp'
+      - 'tests/**'
+  pull_request:
+    branches: main
+    paths:
+      - '.github/workflows/cmake-anolis.yml'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'include/**'
+      - 'src/*pp'
+      - 'src/linux/*pp'
+      - 'tests/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container: openanolis/anolisos:23.4
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ matrix.compiler }}-${{ matrix.version }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install dependencies
+        run: dnf install -y cmake gcc-toolset-14 gcc-toolset-14-gcc-c++
+
+      - name: Compile
+        env:
+          arch: loongarch64
+        run: |
+          scl enable gcc-toolset-14 bash
+          cmake --build build --verbose
