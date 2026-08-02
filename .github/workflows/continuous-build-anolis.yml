@@ -82,6 +82,7 @@ jobs:
         run: |
           GIT_HASH=$(git rev-parse --short "${GITHUB_SHA}")
           FILENAME=btop-loongarch64-${GIT_HASH}
+          mkdir -p bin
           cp build/btop bin/${FILENAME}
 
       - name: Upload artifacts
